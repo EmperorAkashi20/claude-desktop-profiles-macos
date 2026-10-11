@@ -4,7 +4,11 @@ Use several Claude accounts in **one** Claude Desktop app — switch from the me
 
 > Unofficial. Not affiliated with or endorsed by Anthropic. It works by moving the app's data directory around, so an app update that changes the internal layout may break it — see [Caveats](#caveats).
 
-<img src="docs/menu.png" width="560" alt="The Profiles for Claude menu: four profiles with their 5-hour and 7-day usage, the active one checked, plus Add profile and Next profile">
+This fork replaces the original menu with a compact native panel: friendly names, horizontal remaining-usage bars, an active-account indicator and visible cache age. The CLI, authentication, usage collection and session synchronization are unchanged. See the [panel guide](docs/menu-bar-ui.md).
+
+<img src="docs/panel-light.png" width="340" alt="Light panel with friendly profile names, usage bars, unknown data and an active account"> <img src="docs/panel-dark.png" width="340" alt="The same native panel in dark appearance">
+
+Previews use demonstration profiles and sample usage.
 
 ## Why
 
@@ -20,7 +24,7 @@ Claude Desktop knows exactly one sign-in at a time. If you keep a personal accou
 Requirements: macOS 13+, [Claude Desktop](https://claude.ai/download), Xcode Command Line Tools (`xcode-select --install`, needed to compile the tiny menu bar app).
 
 ```bash
-git clone https://github.com/erorplex/claude-desktop-profiles-macos.git
+git clone --branch rishabh/feature-profiles-menubar-ui https://github.com/EmperorAkashi20/claude-desktop-profiles-macos.git
 cd claude-desktop-profiles-macos
 ./install.sh
 ```
@@ -31,7 +35,11 @@ The app is ad-hoc signed (no Apple developer account involved). If macOS refuses
 
 ## Use
 
-Click the person icon in the menu bar (top right, next to the clock) and pick a profile. The menu shows the percentage **remaining** in each profile's 5-hour and 7-day windows — plus every per-model window and confirmed reset times, once you have [recorded them](#plan-limits-in-the-menu). The menu bar highlights whichever general limit has less remaining: for example, 14% used over five hours and 96% used over seven days becomes **7 d 4% left**. Per-model caps remain visible in the menu without being presented as a limit on the entire account. The menu also shows how old the cached usage is; Refresh rereads saved data, it does not query Claude's servers. ⌘1–⌘9 switch directly.
+Click the person icon in the menu bar (top right, next to the clock) and pick a profile. The panel shows horizontal bars for the percentage **remaining** in each profile's 5-hour and 7-day windows, plus every per-model window and confirmed reset times once you have [recorded them](#plan-limits-in-the-menu). Unknown usage has a neutral track labelled **Unknown**, with no invented percentage. The menu bar highlights whichever general limit has less remaining: for example, 14% used over five hours and 96% used over seven days becomes **7 d 4%**. Per-model caps remain visible in the panel without being presented as a limit on the entire account.
+
+Each account shows how old its cached usage is. Refresh rereads saved data; it does not query Claude's servers. While the panel is open, ⌘1–⌘9 select a profile, ⌘N selects the next profile, ⌘R refreshes, and Escape closes the panel.
+
+**Naming accounts:** open the panel's **Profile options** menu (ellipsis), then **Rename profile**, or right-click a profile and choose **Rename profile…**. Names use the existing local labels and persist across switches and app restarts. Renaming does not change an account's sign-in. Long names are truncated visually; hovering shows the full name.
 
 **Adding an account:** choose *Add profile…*. Claude relaunches signed out — sign in with the other account and open the *Code* tab once. Wait for the switcher to relaunch Claude again and confirm that sessions were added before starting work. From then on the profile stays signed in. Repeat for as many accounts as you have. If sign-in takes more than about 15 minutes, finish signing in and opening the Code tab, then switch away and back to sync sessions.
 

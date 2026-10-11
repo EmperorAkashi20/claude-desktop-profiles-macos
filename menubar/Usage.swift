@@ -22,6 +22,14 @@ struct Window: Decodable {
     var remainingPercent: Int? { percentUsed.map { max(0, min(100, 100 - $0)) } }
     var remaining: String { remainingPercent.map { "\($0)% left" } ?? "unknown" }
 
+    var displayTitle: String {
+        switch key {
+        case "five_hour": return "5-hour"
+        case "weekly": return "Weekly"
+        default: return key.hasPrefix("weekly_") ? "\(short) · weekly" : short
+        }
+    }
+
     var reset: String? {
         // Also suppress estimates from an older CLI and expired recorded times.
         guard estimated != true, let ms = resetsAt, ms.isFinite,
@@ -62,10 +70,41 @@ struct Profile: Decodable {
             }.first
     }
 
+    var displayName: String {
+        let name = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "Profile \(n)" : name
+    }
+
+    var compactName: String {
+        displayName.count > 20 ? String(displayName.prefix(19)) + "…" : displayName
+    }
+
     var menuBarTitle: String {
-        guard logged_in else { return label + "  (sign in)" }
-        guard let window = limitingWindow else { return label + "  limits unknown" }
-        return label + "  ·  " + window.short + " " + window.remaining
+        guard logged_in else { return compactName + " · Sign in" }
+        guard let window = limitingWindow, let remaining = window.remainingPercent else {
+            return compactName + " · ?"
+        }
+        return compactName + " · " + window.short + " \(remaining)%"
+    }
+
+    var cacheSummary: String {
+        guard let age else {
+            return usageWindows.contains(where: { $0.remainingPercent != nil })
+                ? "Cache time unknown" : "No usage saved"
+        }
+        if age < 60 { return "Saved just now" }
+        if age < 3600 { return "Saved \(age / 60) min ago" }
+        return "Saved \(age / 3600) h ago"
+    }
+
+    var accessibilityUsage: String {
+        guard logged_in else { return "Sign-in required" }
+        let limits = usageWindows.map { window in
+            let remaining = window.remainingPercent.map { "\($0) percent remaining" } ?? "usage unavailable"
+            let reset = window.reset.map { ", resets \($0)" } ?? ""
+            return "\(window.displayTitle): \(remaining)\(reset)"
+        }
+        return ([cacheSummary, "Cached usage"] + limits).joined(separator: ". ")
     }
 
     var updated: String {
